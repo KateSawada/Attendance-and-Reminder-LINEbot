@@ -312,7 +312,7 @@ function decideHost(){
   const hostsSheet = spreadsheet.getSheetByName('hosts');
   const attendanceSheet = spreadsheet.getSheetByName('attendance');
   
-  var hostsId = [] //ホストやってもいい人の配列を確保
+  var hostsId = []; //ホストやってもいい人の配列を確保
   var lastRow=hostsSheet.getDataRange().getLastRow(); //対象となるシートの最終行を取得
   for(var i=1;i<=lastRow;i++){
     hostsId.push(hostsSheet.getRange(i, 1).getValue());
