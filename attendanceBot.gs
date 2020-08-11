@@ -60,7 +60,7 @@ function reply_message(e) {
     updateRecords(e.source.userId, 2);
   } else if (input_text == "行けないよ…" + strToday + "@出欠bot"){
     updateRecords(e.source.userId, 3);
-  } /*else if (input_text == "do_karate_app_initialize"){ //グループのidをスプシに書き込み グループに参加した時に自動で処理できるようにしたかった
+  } /*else if (input_text == "do_app_initialize"){ //グループのidをスプシに書き込み グループに参加した時に自動で処理できるようにしたかった
     recordGroupId(e.source.groupId);
     push_text("やあ！毎週火曜日の筋トレzoom会の出欠をとるbotだよ！\nまずはみんな友だち追加をよろしく！(LINEの仕様上、全員が追加してくれないと動かないんだ)\n火曜日の朝に出欠をとるボタンがついたメッセージを送るから、ボタンで回答してね");
   } */else if (input_text == "ホストできるよ@出欠bot"){ //ホストできる人として登録する
