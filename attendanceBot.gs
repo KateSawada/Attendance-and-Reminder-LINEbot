@@ -12,6 +12,7 @@ function doPost(e) {
 function reply_message(e) {
   var input_text = e.message.text;
   var strToday = Utilities.formatDate(new Date(), "Asia/Tokyo", "MM/dd");
+  //アンケートを送信
   if (input_text == "アンケちょーだい@出欠bot") {
     var postData = {
       "replyToken": e.replyToken,
@@ -51,7 +52,7 @@ function reply_message(e) {
         }
       }]
     };
-  } else if (input_text == "行くよ！" + strToday + "@出欠bot"){
+  } else if (input_text == "行くよ！" + strToday + "@出欠bot"){ //アンケートのボタンを押した際の回答メッセージを処理
     updateRecords(e.source.userId, 0);
   } else if (input_text == "途中で抜けるよ！" + strToday + "@出欠bot"){
     updateRecords(e.source.userId, 1);
@@ -59,12 +60,12 @@ function reply_message(e) {
     updateRecords(e.source.userId, 2);
   } else if (input_text == "行けないよ…" + strToday + "@出欠bot"){
     updateRecords(e.source.userId, 3);
-  } /*else if (input_text == "do_karate_app_initialize"){ //グループのidをスプシに書き込み
+  } /*else if (input_text == "do_karate_app_initialize"){ //グループのidをスプシに書き込み グループに参加した時に自動で処理できるようにしたかった
     recordGroupId(e.source.groupId);
-    push_text("やあ！空手同好会の筋トレの出欠をとるbotだよ！\nまずはみんな友だち追加をよろしく！(LINEの仕様上、全員が追加してくれないと動かないんだ)\n火曜日の朝に出欠をとるボタンがついたメッセージを送るから、ボタンで回答してね");
-  } */else if (input_text == "ホストできるよ@出欠bot"){
+    push_text("やあ！毎週火曜日の筋トレzoom会の出欠をとるbotだよ！\nまずはみんな友だち追加をよろしく！(LINEの仕様上、全員が追加してくれないと動かないんだ)\n火曜日の朝に出欠をとるボタンがついたメッセージを送るから、ボタンで回答してね");
+  } */else if (input_text == "ホストできるよ@出欠bot"){ //ホストできる人として登録する
     recordAsHost(e.source.userId);
-  } else if (input_text == "ホストできないよ@出欠bot"){
+  } else if (input_text == "ホストできないよ@出欠bot"){　//ホストできる人から登録解除する
     recordNotAsHost(e.source.userId);
   }
   fetch_data(postData);
@@ -90,6 +91,7 @@ function recordAsHost(userId){
   push_text(getUserProfile(userId) + "さんを登録したよ");
 }
 
+//ホストできる人から登録解除
 function recordNotAsHost(userId){
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('hosts');
   var lastRow=sheet.getDataRange().getLastRow(); //対象となるシートの最終行を取得
@@ -101,7 +103,7 @@ function recordNotAsHost(userId){
   }
 }
 
-//textを送信する
+//引数で渡された文字列を送信する
 function push_text(containts){ 
   var postData = {
       "to": SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('group_id').getRange(1, 1).getValue(), //送信先の取得
@@ -139,7 +141,7 @@ function fetch_data(postData) {
 
 //出欠確認のボタンの送信
 function push_ask(){
-  var strToday = Utilities.formatDate(new Date(), "Asia/Tokyo", "MM/dd");
+  var strToday = Utilities.formatDate(new Date(), "Asia/Tokyo", "MM/dd"); //今日の日付の取得
     var postData = {
       "to": SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('group_id').getRange(1, 1).getValue(), //送信先の取得
       "messages": [{
@@ -193,6 +195,7 @@ function push_ask(){
   
 }
 
+//参加者の配列を返す
 function getParticipants(){
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = spreadsheet.getSheetByName('attendance');
@@ -200,16 +203,16 @@ function getParticipants(){
   var participants = [[],[],[],[]];
   for(var i=1;i<=lastRow;i++){
     switch (sheet.getRange(i,2).getValue()){
-      case 0:
+      case 0: //「行けるよ！」
         participants[0].push(sheet.getRange(i,1).getValue());
         break;
-      case 1:
+      case 1: //「途中から行くよ！」
         participants[2].push(sheet.getRange(i,1).getValue());
         break;
-      case 2:
+      case 2: //「途中で抜けるよ！」
         participants[1].push(sheet.getRange(i,1).getValue());
         break;
-      case 3:
+      case 3: //「行けないよ…」
         participants[3].push(sheet.getRange(i,1).getValue());
         break;
     }
@@ -219,17 +222,17 @@ function getParticipants(){
 
 //リマインドの送信
 function push_host(){
-  var strToday = Utilities.formatDate(new Date(), "Asia/Tokyo", "MM/dd");
-  var host = decideHost();
-  var containts = ""
+  var strToday = Utilities.formatDate(new Date(), "Asia/Tokyo", "MM/dd"); //日付の取得
+  var host = decideHost(); //ホストの決定
+  var containts = "" //送信するテキスト
   
-  if (host == "errorcode:0"){
+  if (host == "errorcode:0"){　//誰も参加できない時
     containts = "今日(" + strToday + ")は参加できる人がいないみたい！"
-  } else {
+  } else { //誰かしら参加できる時
     containts = "このあと18時から始まるよ！\n今日(" + strToday + ")は" + getUserProfile(host) + "さん、zoomを立てるのヨロシクね！"
     var participants = getParticipants();
-    var attendstr = ["最初から参加するのは ", "途中から参加するのは ", "途中で抜けるのは "];
-    var participantsstr = "\n";
+    var attendstr = ["最初から参加するのは ", "途中から参加するのは ", "途中で抜けるのは "]; 
+    var participantsstr = "\n"; //出欠の一覧のテキスト
     for (var i=0; i<=2; i++){
       if (participants[i].length > 0){
         participantsstr += "\n" + attendstr[i];
@@ -284,20 +287,14 @@ function updateRecords(userId, attendance){
   }
 }
 
-//出欠をすべて消去
+//出欠をすべて消去(アンケート送信前に実行されるようにトリガーを設定)
 function clearRecords(){
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = spreadsheet.getSheetByName('attendance');
   sheet.clearContents();
 }
-/*
-function getUserName(user_id){
-  profile = line_bot_api.get_profile(user_id)
-  return profile.display_name
-}
-*/
 
-//idから名前に変換
+//idから表示名に変換
 function getUserProfile(userId){ 
     var url = 'https://api.line.me/v2/bot/profile/' + userId;
     var userProfile = UrlFetchApp.fetch(url,{
@@ -309,7 +306,7 @@ function getUserProfile(userId){
 }
 
 //スプシの情報から誰がホストやるか決める
-//抽選結果のidを返す誰も参加できない場合は0を返す
+//抽選結果のidを返す 誰も参加できない場合は0を返す
 function decideHost(){
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   const hostsSheet = spreadsheet.getSheetByName('hosts');
